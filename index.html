@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тайм-трекер</title>
+    <style>
+        /* Цвета на основе скриншота */
+        :root {
+            --bg-color: #f6f5ef;
+            --text-main: #111111;
+            --text-muted: #888888;
+            --border-color: #dcdcd5;
+            --accent-green: #25785f;
+            --accent-green-light: #e5efe9;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Шапка */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .header-title-block {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .current-date {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 64px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .btn-pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-pill:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+
+        /* Блок активного таймера (стилизован под 0/45 со скрина) */
+        .active-timer-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .timer-huge {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .timer-huge .time {
+            font-size: 80px;
+            font-weight: bold;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .timer-huge .task-label {
+            font-size: 24px;
+            color: var(--text-muted);
+            margin-left: 10px;
+        }
+
+        /* Кнопка старта в виде круга */
+        .circle-btn {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            border: 8px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .circle-btn.active {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* Сетка статистики */
+        .stats-row {
+            display: flex;
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            background: #fff;
+            /* Легкий контраст с бежевым фоном */
+        }
+
+        .stat-box {
+            flex: 1;
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-box:last-child {
+            border-right: none;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Общие инпуты и формы */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .badge {
+            background-color: var(--accent-green-light);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            border-radius: 15px;
+            padding: 2px 10px;
+            font-size: 12px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 40px;
+        }
+
+        input {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 4px;
+            outline: none;
+            color: var(--text-main);
+        }
+
+        input:focus {
+            border-color: var(--text-main);
+        }
+
+        .flex-grow {
+            flex: 1;
+        }
+
+        .btn-solid {
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-solid:hover {
+            background-color: #1e614d;
+        }
+
+        /* История */
+        .record-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-task {
+            font-weight: bold;
+        }
+
+        .record-date-time {
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 600px) {
+            .stats-row {
+                flex-direction: column;
+            }
+
+            .stat-box {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .stat-box:last-child {
+                border-bottom: none;
+            }
+
+            .input-row {
+                flex-direction: column;
+            }
+
+            .timer-huge .time {
+                font-size: 48px;
+            }
+
+            h1 {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div class="header-title-block">
+                <div class="current-date" id="currentDateLabel">июль 2026 г.</div>
+                <h1>Трекер</h1>
+            </div>
+            <button class="btn-pill" onclick="app.clearAll()">Сбросить всё</button>
+        </header>
+
+        <div class="current-date" style="margin-bottom: 10px;">Сейчас</div>
+        <div class="active-timer-section">
+            <div class="timer-huge">
+                <span class="time" id="activeTimer">00:00:00</span>
+                <span class="task-label" id="activeTaskLabel">/ нет задачи</span>
+            </div>
+            <div class="circle-btn" id="startBtn" onclick="app.toggleTimer()">Старт</div>
+        </div>
+
+        <div class="input-row" style="padding-bottom: 20px; border-bottom: none;">
+            <input type="text" id="taskName" class="flex-grow" placeholder="Название текущей задачи...">
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-value" id="statToday">0ч</div>
+                <div class="stat-label">за сегодня</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statWeek">0ч</div>
+                <div class="stat-label">за неделю</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statYear">0ч</div>
+                <div class="stat-label">за год</div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">Добавить вручную</div>
+            <div class="badge" id="totalRecordsBadge">0 записей</div>
+        </div>
+        <div class="input-row">
+            <input type="text" id="manualTaskName" class="flex-grow" placeholder="Название задачи">
+            <input type="date" id="manualDate">
+            <input type="number" id="manualHours" placeholder="Часы" min="0" max="24" style="width: 80px;">
+            <input type="number" id="manualMinutes" placeholder="Минуты" min="0" max="59" style="width: 80px;">
+            <button class="btn-solid" onclick="app.addManualEntry()">Добавить</button>
+        </div>
+
+        <div class="section-header" style="margin-bottom: 0;">
+            <div class="section-title" style="color: var(--text-muted); font-weight: normal;">Последние записи</div>
+        </div>
+        <div class="record-list" id="recentRecords">
+        </div>
+    </div>
+
+    <script>
+        class TimeTracker {
+            constructor() {
+                this.records = JSON.parse(localStorage.getItem('timeTrackerDataV2')) || [];
+                this.activeTask = null;
+                this.timerInterval = null;
+
+                // Установка дат
+                const now = new Date();
+                document.getElementById('manualDate').valueAsDate = now;
+
+                const monthNames = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август",
+                    "сентябрь", "октябрь", "ноябрь", "декабрь"
+                ];
+                document.getElementById('currentDateLabel').innerText =
+                    `${monthNames[now.getMonth()]} ${now.getFullYear()} г.`;
+
+                this.init();
+            }
+
+            init() {
+                this.updateUI();
+            }
+
+            save() {
+                // Очищаем старые записи (старше 1 года)
+                const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
+                this.records = this.records.filter(r => new Date(r.date).getTime() > oneYearAgo);
+
+                localStorage.setItem('timeTrackerDataV2', JSON.stringify(this.records));
+                this.updateUI();
+            }
+
+            toggleTimer() {
+                const btn = document.getElementById('startBtn');
+                const input = document.getElementById('taskName');
+                const label = document.getElementById('activeTaskLabel');
+
+                if (!this.activeTask) {
+                    // Старт
+                    const name = input.value.trim() || 'Без названия';
+                    this.activeTask = {
+                        id: Date.now(),
+                        name: name,
+                        startTime: Date.now()
+                    };
+                    input.disabled = true;
+                    btn.innerText = 'Стоп';
+                    btn.classList.add('active');
+                    label.innerText = `/ ${name}`;
+
+                    this.timerInterval = setInterval(() => {
+                        const diff = Date.now() - this.activeTask.startTime;
+                        document.getElementById('activeTimer').innerText = this.formatTime(diff);
+                    }, 1000);
+                } else {
+                    // Стоп
+                    clearInterval(this.timerInterval);
+                    const endTime = Date.now();
+                    const duration = endTime - this.activeTask.startTime;
+
+                    this.records.push({
+                        id: this.activeTask.id,
+                        name: this.activeTask.name,
+                        duration: duration,
+                        date: new Date().toISOString()
+                    });
+
+                    this.activeTask = null;
+                    input.disabled = false;
+                    input.value = '';
+                    btn.innerText = 'Старт';
+                    btn.classList.remove('active');
+                    document.getElementById('activeTimer').innerText = '00:00:00';
+                    label.innerText = '/ нет задачи';
+
+                    this.save();
+                }
+            }
+
+            addManualEntry() {
+                const name = document.getElementById('manualTaskName').value.trim() || 'Без названия';
+                const dateVal = document.getElementById('manualDate').value;
+                const hours = parseInt(document.getElementById('manualHours').value) || 0;
+                const minutes = parseInt(document.getElementById('manualMinutes').value) || 0;
+
+                if (hours === 0 && minutes === 0) {
+                    alert('Укажите потраченное время!');
+                    return;
+                }
+
+                const durationMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+
+                const recordDate = new Date(dateVal);
+                recordDate.setHours(12, 0, 0, 0);
+
+                this.records.push({
+                    id: Date.now(),
+                    name: name,
+                    duration: durationMs,
+                    date: recordDate.toISOString()
+                });
+
+                document.getElementById('manualTaskName').value = '';
+                document.getElementById('manualHours').value = '';
+                document.getElementById('manualMinutes').value = '';
+
+                this.save();
+            }
+
+            clearAll() {
+                if (confirm('Удалить всю историю? Это действие нельзя отменить.')) {
+                    this.records = [];
+                    localStorage.removeItem('timeTrackerDataV2');
+                    this.updateUI();
+                }
+            }
+
+            updateUI() {
+                this.calculateStats();
+                this.renderRecent();
+                document.getElementById('totalRecordsBadge').innerText = `${this.records.length} записей`;
+            }
+
+            calculateStats() {
+                const now = new Date();
+                const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                const startOfWeek = startOfDay - (now.getDay() === 0 ? 6 : now.getDay() - 1) * 24 * 60 * 60 * 1000;
+                const startOfYear = new Date(now.getFullYear(), 0, 1).getTime();
+
+                let msToday = 0,
+                    msWeek = 0,
+                    msYear = 0;
+
+                this.records.forEach(record => {
+                    const recordTime = new Date(record.date).getTime();
+                    if (recordTime >= startOfDay) msToday += record.duration;
+                    if (recordTime >= startOfWeek) msWeek += record.duration;
+                    if (recordTime >= startOfYear) msYear += record.duration;
+                });
+
+                document.getElementById('statToday').innerText = this.formatShortDuration(msToday);
+                document.getElementById('statWeek').innerText = this.formatShortDuration(msWeek);
+                document.getElementById('statYear').innerText = this.formatShortDuration(msYear);
+            }
+
+            renderRecent() {
+                const container = document.getElementById('recentRecords');
+                container.innerHTML = '';
+
+                if (this.records.length === 0) {
+                    container.innerHTML =
+                        '<div class="record-item" style="color: var(--text-muted); border: none;">Пока нет записей</div>';
+                    return;
+                }
+
+                const recent = [...this.records].sort((a, b) => b.id - a.id).slice(0, 15);
+
+                recent.forEach(record => {
+                    const div = document.createElement('div');
+                    div.className = 'record-item';
+                    const d = new Date(record.date);
+                    const dateStr = d.toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit'
+                    });
+
+                    div.innerHTML = `
+                <div class="record-task">${record.name}</div>
+                <div class="record-date-time">${this.formatDurationStr(record.duration)} <span style="margin-left:15px;font-size:12px;">${dateStr}</span></div>
+            `;
+                    container.appendChild(div);
+                });
+            }
+
+            formatTime(ms) {
+                const totalSeconds = Math.floor(ms / 1000);
+                const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                const seconds = String(totalSeconds % 60).padStart(2, '0');
+                return `${hours}:${minutes}:${seconds}`;
+            }
+
+            formatDurationStr(ms) {
+                const totalMinutes = Math.floor(ms / (1000 * 60));
+                const hours = Math.floor(totalMinutes / 60);
+                const mins = totalMinutes % 60;
+                if (hours > 0) return `${hours}ч ${mins}м`;
+                return `${mins}м`;
+            }
+
+            formatShortDuration(ms) {
+                if (ms === 0) return '0ч';
+                const hours = (ms / (1000 * 60 * 60)).toFixed(1);
+                return hours.endsWith('.0') ? `${Math.round(hours)}ч` : `${hours}ч`;
+            }
+        }
+
+        const app = new TimeTracker();
+    </script>
+</body>
+
+</html>
