@@ -310,6 +310,10 @@
                 <div class="stat-label">за неделю</div>
             </div>
             <div class="stat-box">
+                <div class="stat-value" id="statMonth">0ч</div>
+                <div class="stat-label">за месяц</div>
+            </div>
+            <div class="stat-box">
                 <div class="stat-value" id="statYear">0ч</div>
                 <div class="stat-label">за год</div>
             </div>
@@ -452,6 +456,13 @@
                 }
             }
 
+            deleteRecord(id) {
+                if (confirm('Удалить эту запись?')) {
+                    this.records = this.records.filter(r => r.id !== id);
+                    this.save();
+                }
+            }
+
             updateUI() {
                 this.calculateStats();
                 this.renderRecent();
@@ -462,21 +473,25 @@
                 const now = new Date();
                 const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
                 const startOfWeek = startOfDay - (now.getDay() === 0 ? 6 : now.getDay() - 1) * 24 * 60 * 60 * 1000;
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
                 const startOfYear = new Date(now.getFullYear(), 0, 1).getTime();
 
                 let msToday = 0,
                     msWeek = 0,
+                    msMonth = 0,
                     msYear = 0;
 
                 this.records.forEach(record => {
                     const recordTime = new Date(record.date).getTime();
                     if (recordTime >= startOfDay) msToday += record.duration;
                     if (recordTime >= startOfWeek) msWeek += record.duration;
+                    if (recordTime >= startOfMonth) msMonth += record.duration;
                     if (recordTime >= startOfYear) msYear += record.duration;
                 });
 
                 document.getElementById('statToday').innerText = this.formatShortDuration(msToday);
                 document.getElementById('statWeek').innerText = this.formatShortDuration(msWeek);
+                document.getElementById('statMonth').innerText = this.formatShortDuration(msMonth);
                 document.getElementById('statYear').innerText = this.formatShortDuration(msYear);
             }
 
@@ -505,6 +520,7 @@
                     div.innerHTML = `
                 <div class="record-task">${record.name}</div>
                 <div class="record-date-time">${this.formatDurationStr(record.duration)} <span style="margin-left:15px;font-size:12px;">${dateStr}</span></div>
+                <button onclick="app.deleteRecord(${record.id})" style="background:none;border:none;cursor:pointer;color:var(--text-muted);margin-left:10px;font-size:16px;">×</button>
             `;
                     container.appendChild(div);
                 });
