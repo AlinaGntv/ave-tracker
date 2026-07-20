@@ -314,6 +314,10 @@
                 <div class="stat-label">за неделю</div>
             </div>
             <div class="stat-box">
+                <div class="stat-value" id="statLastWeek">0ч</div>
+                <div class="stat-label">за прошлую неделю</div>
+            </div>
+            <div class="stat-box">
                 <div class="stat-value" id="statMonth">0ч</div>
                 <div class="stat-label">за месяц</div>
             </div>
@@ -481,9 +485,12 @@
                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
                 const startOfYear = new Date(now.getFullYear(), 0, 1).getTime();
 
+                const startOfLastWeek = startOfWeek - 7 * 24 * 60 * 60 * 1000;
+
                 let msToday = 0,
                     msYesterday = 0,
                     msWeek = 0,
+                    msLastWeek = 0,
                     msMonth = 0,
                     msYear = 0;
 
@@ -492,6 +499,7 @@
                     if (recordTime >= startOfDay) msToday += record.duration;
                     if (recordTime >= startOfYesterday && recordTime < startOfDay) msYesterday += record.duration;
                     if (recordTime >= startOfWeek) msWeek += record.duration;
+                    if (recordTime >= startOfLastWeek && recordTime < startOfWeek) msLastWeek += record.duration;
                     if (recordTime >= startOfMonth) msMonth += record.duration;
                     if (recordTime >= startOfYear) msYear += record.duration;
                 });
@@ -499,6 +507,7 @@
                 document.getElementById('statToday').innerText = this.formatShortDuration(msToday);
                 document.getElementById('statYesterday').innerText = this.formatShortDuration(msYesterday);
                 document.getElementById('statWeek').innerText = this.formatShortDuration(msWeek);
+                document.getElementById('statLastWeek').innerText = this.formatShortDuration(msLastWeek);
                 document.getElementById('statMonth').innerText = this.formatShortDuration(msMonth);
                 document.getElementById('statYear').innerText = this.formatShortDuration(msYear);
             }
