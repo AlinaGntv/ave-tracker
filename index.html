@@ -561,8 +561,12 @@
 
             formatShortDuration(ms) {
                 if (ms === 0) return '0ч';
-                const hours = (ms / (1000 * 60 * 60)).toFixed(1);
-                return hours.endsWith('.0') ? `${Math.round(hours)}ч` : `${hours}ч`;
+                const totalMinutes = Math.floor(ms / (1000 * 60));
+                const hours = Math.floor(totalMinutes / 60);
+                const mins = totalMinutes % 60;
+                if (hours > 0 && mins > 0) return `${hours}ч ${mins}м`;
+                if (hours > 0) return `${hours}ч`;
+                return `${mins}м`;
             }
         }
 
